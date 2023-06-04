@@ -4,6 +4,7 @@ from airflow import DAG
 
 from airflow.operators.python import PythonOperator
 from airflow.utils.dates import days_ago
+import pandas as pd
 
 import logging
 
@@ -16,13 +17,16 @@ default_args = {
     'retry_delay': timedelta(minutes=5)
 }
 
-def scrape():
-    logging.info("scrapping")
+def extraer():
+    df = pd.read_csv("https://kf.kobotoolbox.org/api/v2/assets/a3MRsgwdgcjD5c2qKzdNS4/export-settings/esSPAby29U5Tbhyr63iLZft/data.csv", sep=";")
+    df.to_csv("/tmp/antropometria.csv", index=False
+               )
 
-def process():
-    logging.info("processing")
+def trasnformar():
+    df = pd.read_csv("/tmp/antropometria.csv")
+    logging(df.head)
 
-def save():
+def cargar():
     logging.info("saving")
 
 with DAG(
@@ -34,8 +38,8 @@ with DAG(
     tags=['example1'],
     
 ) as dag:
-    scrape_task = PythonOperator(task_id="scrape", python_callable = scrape)
-    process_task = PythonOperator(task_id="process", python_callable = process)
-    save_task = PythonOperator(task_id="save", python_callable = save)
+    extraer_task = PythonOperator(task_id="extraer", python_callable = extraer)
+    trasnformar_task = PythonOperator(task_id="trasnformar", python_callable = trasnformar)
+    cargar_task = PythonOperator(task_id="cargar", python_callable = cargar)
 
-    scrape_task >> process_task >> save_task
+    extraer_task >> trasnformar_task >> cargar_task
